@@ -1,6 +1,6 @@
 const CACHE = 'watch-v1';
 const ASSETS = [
-  './Snap.html',
+  './snap.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'
