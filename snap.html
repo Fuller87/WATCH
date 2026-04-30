@@ -3948,12 +3948,17 @@ function calcTeamType(chars, tactics) {
     if (t.for === 'attrition') attrScore++;
     else if (t.for === 'scoring') scorScore++;
   });
-  // Control wins if it clearly dominates both attrition and scoring
-  const ctrlPerChar = chars.length > 0 ? ctrlScore / chars.length : 0;
+  // Normalisierte Werte — gleiche Logik wie die %-Anzeige
+  const ctrlNorm  = ctrlScore * 0.4;
+  const normTotal = attrScore + scorScore + ctrlNorm;
+  const ctrlPct   = normTotal > 0 ? ctrlNorm  / normTotal : 0;
+  const attrPct   = normTotal > 0 ? attrScore / normTotal : 0;
+  const scorPct   = normTotal > 0 ? scorScore / normTotal : 0;
+  // Control gewinnt wenn normalisiert dominant (>50% und mehr als die anderen)
+  if (ctrlPct >= 0.50 && ctrlPct > attrPct && ctrlPct > scorPct)
+    return { label: 'Control', col: '#44aacc', icon: '🔗', attrScore, scorScore, ctrlScore };
   const total = attrScore + scorScore;
   const ratio = total > 0 ? attrScore / total : 0.5;
-  if (ctrlPerChar >= 3.5 && ctrlScore > attrScore && ctrlScore > scorScore)
-    return { label: 'Control', col: '#44aacc', icon: '🔗', attrScore, scorScore, ctrlScore };
   if (ratio >= 0.60) return { label: 'Attrition',    col: '#cc4444', icon: '💀', attrScore, scorScore, ctrlScore };
   if (ratio <= 0.40) return { label: 'Mission Play', col: '#6b9fd4', icon: '🎯', attrScore, scorScore, ctrlScore };
   return                   { label: 'Allround',     col: '#9b87b8', icon: '⚙️', attrScore, scorScore, ctrlScore };
