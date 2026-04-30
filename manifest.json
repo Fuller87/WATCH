@@ -2,7 +2,7 @@
   "name": "W.A.T.C.H.",
   "short_name": "W.A.T.C.H.",
   "description": "Warzone Advisor for Tactics, Crises & Heroes — Marvel Crisis Protocol",
-  "start_url": "./Snap.html",
+  "start_url": "./snap.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#111526",
