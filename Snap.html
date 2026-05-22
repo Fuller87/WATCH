@@ -3163,9 +3163,26 @@ function parseAndImport() {
     return;
   }
 
+  // "Als neues Roster speichern" → neue ID erzwingen
+  const saveAsNew = document.getElementById('imp-new-check').checked;
+  if (saveAsNew) currentEditingId = null;
+
   // Apply to roster
   const nameInput = document.getElementById('imp-roster-name').value.trim();
-  if (nameInput) myRoster.name = nameInput;
+  const targetName = nameInput || myRoster.name || '';
+
+  // If overwriting: find existing roster in library with the same name and confirm
+  if (!saveAsNew) {
+    const lib = loadLibrary();
+    const conflict = lib.find(s => s.id !== currentEditingId && s.name.toLowerCase() === targetName.toLowerCase());
+    if (conflict) {
+      if (!confirm(`Ein Roster mit dem Namen „${conflict.name}" existiert bereits in der Bibliothek. Wirklich überschreiben?`)) return;
+      // adopt the existing roster's ID so we overwrite it
+      currentEditingId = conflict.id;
+    }
+  }
+
+  if (targetName) myRoster.name = targetName;
   if (parsedChars.length)   myRoster.chars   = parsedChars;
   if (parsedTactics.length) myRoster.tactics = parsedTactics;
 
@@ -3173,9 +3190,6 @@ function parseAndImport() {
   if (!myRoster.importedCrisis) myRoster.importedCrisis = {};
   if (parsedSecure.length)  myRoster.importedCrisis.secure  = parsedSecure;
   if (parsedExtract.length) myRoster.importedCrisis.extract = parsedExtract;
-
-  // "Als neues Roster speichern" → neue ID erzwingen
-  if (document.getElementById('imp-new-check').checked) currentEditingId = null;
 
   try {
     saveRosterLS();
