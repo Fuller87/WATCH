@@ -637,6 +637,12 @@
 <div class="max-w-3xl mx-auto panel-base panel-builder p-6">
   <p style="color:#6b7280;font-size:0.8rem;margin-bottom:16px" data-i18n="team_intro">Krise und Gegner wählen – das Roster aus dem Roster-Tab wird verwendet.</p>
 
+  <!-- PIN PANEL -->
+  <div id="pin-panel" style="display:none;margin-bottom:16px;background:rgba(201,162,39,0.06);border:1px solid rgba(201,162,39,0.2);border-radius:10px;padding:10px 12px">
+    <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#c9a227;margin-bottom:8px">📌 <span data-i18n="pin_heading">Immer ins Team</span></div>
+    <div id="pin-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  </div>
+
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
     <!-- Secure -->
     <div>
@@ -1104,6 +1110,14 @@ const TRANSLATIONS = {
     pb_msg_critical:'Power-Budget kritisch — Ø {cost}⚡ Kosten bei Ø {income}⚡/Rd pro Char ({ratio}×). Hungrig: {chars}',
     pb_hungry_suffix: '. Hungrig: {chars}',
     pb_roster_footnote: '🔴 <b>hungrig</b> = Verbrauch > Einnahmen × 2 · <b>Einnahmen</b> = 1 + Power-Phase + Gem + 1,5 Angriffe×0,4 · <b>Verbrauch</b> = günstigster bezahlter Angriff + günstigste Active + günstigste Reactive Power',
+
+    // Pin panel
+    pin_heading:               'Immer ins Team',
+    pin_tactic_heading:        'Immer spielen',
+    pin_remove:                'Pin entfernen',
+    pts_label:                 'Punkte',
+    pinned_label:              'gepinnt',
+    no_scoring_label:          'kein Scoring',
 
     // Tactics recommendation
     tactics_reco_heading:      '🃏 Empfohlene Taktikkarten',
@@ -1710,6 +1724,14 @@ const TRANSLATIONS = {
     pb_hungry_suffix: '. Hungry: {chars}',
     pb_roster_footnote: '🔴 <b>hungry</b> = Cost > Income × 2 · <b>Income</b> = 1 + Power Phase + Gem + 1.5 attacks×0.4 · <b>Cost</b> = cheapest paid attack + cheapest Active + cheapest Reactive power',
 
+    // Pin panel
+    pin_heading:               'Always in team',
+    pin_tactic_heading:        'Always play',
+    pin_remove:                'Remove pin',
+    pts_label:                 'pts',
+    pinned_label:              'pinned',
+    no_scoring_label:          'no Scoring',
+
     // Tactics recommendation
     tactics_reco_heading:      '🃏 Recommended Tactic Cards',
     tactics_reco_empty:        'No tactic cards in roster.',
@@ -2175,7 +2197,7 @@ function rerenderAll() {
 const presets = {
   "Guardians of the Galaxy": {
     chars: [
-      { name:"Adam Warlock",  threat:8, leader:true,  type:"fighter",  note:"Power Gem · Bonded Soul" },
+      { name:"Adam Warlock",  threat:8, leader:false, type:"fighter",  note:"Power Gem · Bonded Soul" },
       { name:"Nova",          threat:5, leader:false, type:"fighter",  note:"" },
       { name:"Gamora",        threat:4, leader:false, type:"fighter",  note:"" },
       { name:"Yondu",         threat:4, leader:false, type:"fighter",  note:"" },
@@ -2276,10 +2298,11 @@ const presets = {
   },
   "Cabal": {
     chars: [
+      { name:"Kang the Conqueror",           threat:6, leader:true,  type:"fighter",  note:"" },
       { name:"Red Skull",                    threat:4, leader:true,  type:"support",  note:"" },
       { name:"Malekith",                     threat:4, leader:true,  type:"support",  note:"" },
       { name:"Sin",                          threat:4, leader:true,  type:"fighter",  note:"" },
-      { name:"Red Skull, Master of Whispers",threat:5, leader:true,  type:"support",  note:"" },
+      { name:"Red Skull, Master of the World",threat:5, leader:true,  type:"support",  note:"" },
       { name:"MODOK",                        threat:7, leader:false, type:"fighter",  note:"Kein Cabal-Leader!" },
       { name:"Crossbones",                   threat:3, leader:false, type:"fighter",  note:"" },
     ],
@@ -2356,7 +2379,7 @@ const presets = {
       { name:"Doctor Strange",  threat:7, leader:true,  type:"support",  note:"" },
       { name:"Luke Cage",       threat:4, leader:false, type:"fighter",  note:"" },
       { name:"Jessica Jones",   threat:4, leader:false, type:"fighter",  note:"" },
-      { name:"Daredevil",       threat:4, leader:false, type:"scorer",   note:"" },
+      { name:"Daredevil",       threat:4, leader:true,  type:"scorer",   note:"" },
       { name:"Iron Fist",       threat:3, leader:false, type:"fighter",  note:"" },
       { name:"Punisher",        threat:4, leader:false, type:"fighter",  note:"" },
     ],
@@ -2366,11 +2389,27 @@ const presets = {
       { name:"Brace for Impact",      restricted:true,  for:"attrition" },
     ]
   },
+
+  "Mighty Avengers": {
+    chars: [
+      { name:"Blue Marvel",                    threat:5, leader:false, type:"fighter",  note:"" },
+      { name:"She-Hulk",                       threat:6, leader:false, type:"fighter",  note:"" },
+      { name:"Captain Marvel, Cosmic Avenger", threat:5, leader:false, type:"fighter",  note:"" },
+      { name:"Spectrum",                       threat:4, leader:true,  type:"support",  note:"" },
+      { name:"Luke Cage",                      threat:3, leader:false, type:"fighter",  note:"" },
+      { name:"Ant-Man",                        threat:3, leader:false, type:"scorer",   note:"" },
+    ],
+    tactics: [
+      { name:"Field Dressing",  restricted:false, for:"scoring" },
+      { name:"Brace for Impact",restricted:true,  for:"attrition" },
+    ]
+  },
+
   "Inhumans": {
     chars: [
       { name:"Black Bolt", threat:6, leader:true,  type:"fighter",  note:"" },
-      { name:"Crystal",    threat:4, leader:true,  type:"support",  note:"" },
-      { name:"Medusa",     threat:4, leader:true,  type:"scorer",   note:"" },
+      { name:"Crystal",    threat:4, leader:false, type:"support",  note:"" },
+      { name:"Medusa",     threat:4, leader:false, type:"scorer",   note:"" },
       { name:"Karnak",     threat:3, leader:false, type:"support",  note:"" },
       { name:"Lockjaw",    threat:3, leader:false, type:"scorer",   note:"" },
       { name:"Gorgon",     threat:4, leader:false, type:"fighter",  note:"" },
@@ -2396,7 +2435,8 @@ const presets = {
   },
   "S.H.I.E.L.D.": {
     chars: [
-      { name:"Nick Fury",     threat:5, leader:true,  type:"support",  note:"" },
+      { name:"Invincible Iron Man", threat:6, leader:true,  type:"fighter",  note:"" },
+      { name:"Nick Fury",           threat:5, leader:true,  type:"support",  note:"" },
       { name:"Maria Hill",    threat:3, leader:false, type:"scorer",   note:"" },
       { name:"Black Widow",   threat:3, leader:false, type:"scorer",   note:"" },
       { name:"Mockingbird",   threat:3, leader:false, type:"scorer",   note:"" },
@@ -2844,7 +2884,7 @@ const charDB = {};
 Object.values(presets).forEach(p => {
   p.chars.forEach(c => {
     const key = c.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    charDB[key] = c;
+    if (!charDB[key]) charDB[key] = { ...c, leader: false };
   });
 });
 
@@ -3079,11 +3119,13 @@ function parseAndImport() {
     }
 
     // Try to parse as character line
-    let name = null, threat = null;
+    let name = null, threat = null, isLeaderMarked = false;
     const m1 = line.match(charRe);
     const m2 = line.match(altRe);
     if (m1) {
-      name   = m1[1].trim().replace(/^\*+|\*+$/g, '');
+      const rawName = m1[1].trim();
+      isLeaderMarked = rawName.startsWith('*');
+      name   = rawName.replace(/^\*+|\*+$/g, '');
       threat = parseInt(m1[2]);
     } else if (m2) {
       threat = parseInt(m2[1]);
@@ -3098,7 +3140,7 @@ function parseAndImport() {
 
     if (!name || !threat || threat < 1 || threat > 10) continue;
 
-    // Look up in DB for type / leader — prefer exact match, keep original name if more specific
+    // Look up in DB for type — prefer exact match, keep original name if more specific
     const dbKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
     const dbExact = charDB[dbKey];
     const db = dbExact || lookupChar(name);
@@ -3111,7 +3153,7 @@ function parseAndImport() {
       name:   canonName,
       threat: threat,
       type:   db ? db.type   : autoClassifyChar(resolveCharData(canonName)),
-      leader: db ? db.leader : false,
+      leader: isLeaderMarked,
       note:   gemNote || (db ? db.note : ''),
     });
   }
@@ -3165,7 +3207,7 @@ function showPasteFeedback(type, msg) {
 
 // asLeader: explicit override; if undefined, falls back to isEffectiveLeader(c)
 function charChipStyle(c, asLeader) {
-  const ldr = asLeader !== undefined ? asLeader : isEffectiveLeader(c);
+  const ldr = asLeader !== undefined ? asLeader : false;
   if (ldr)                     return 'background:rgba(201,162,39,0.12);border:1px solid rgba(201,162,39,0.28);color:#c9a862';
   if (c.type === 'fighter')    return 'background:rgba(192,80,74,0.12);border:1px solid rgba(192,80,74,0.28);color:#b87e7b';
   if (c.type === 'scorer')     return 'background:rgba(201,123,58,0.12);border:1px solid rgba(201,123,58,0.28);color:#b88e65';
@@ -3175,12 +3217,68 @@ function charChipStyle(c, asLeader) {
 function charChipCss(c) { return ''; }
 
 const pinnedChars = new Set();
+const pinnedTactics = new Set();
 
 function togglePin(name, ev) {
   ev.stopPropagation();
   if (pinnedChars.has(name)) pinnedChars.delete(name);
   else pinnedChars.add(name);
   renderRosterView();
+  renderPinPanel();
+}
+
+function togglePinTactic(name, ev) {
+  ev.stopPropagation();
+  if (pinnedTactics.has(name)) pinnedTactics.delete(name);
+  else pinnedTactics.add(name);
+  renderPinPanel();
+}
+
+function renderPinPanel() {
+  const panel = document.getElementById('pin-panel');
+  const chipsEl = document.getElementById('pin-chips');
+  if (!panel || !chipsEl) return;
+  const chars = (myRoster.chars || []).filter(c => c.name && c.threat > 0);
+  if (!chars.length) { panel.style.display = 'none'; return; }
+  panel.style.display = '';
+
+  chipsEl.innerHTML = chars.slice().sort((a,b) => (b.threat||0)-(a.threat||0) || a.name.localeCompare(b.name)).map(c => {
+    const pinned = pinnedChars.has(c.name);
+    const av = `<img src="${charAvatarUrl(c.name)}" style="width:16px;height:16px;object-fit:cover;object-position:top center;border-radius:50%;flex-shrink:0" onerror="this.style.display='none'">`;
+    const style = pinned
+      ? 'background:rgba(201,162,39,0.18);border:1px solid rgba(201,162,39,0.55);color:#c9a862;'
+      : 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#6b7280;';
+    return `<span onclick="togglePin('${esc(c.name)}',event)" title="${pinned ? T('pin_remove') : T('pin_heading')}"
+      style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.15s;${style}">
+      ${av}${esc(c.name)} <b style="opacity:0.7">${c.threat}</b> ${pinned ? '📌' : ''}
+    </span>`;
+  }).join('');
+
+  // Tactics pin section
+  const tactics = (myRoster.tactics || []).filter(t => t.name);
+  let tacEl = document.getElementById('pin-tactic-section');
+  if (!tacEl) {
+    tacEl = document.createElement('div');
+    tacEl.id = 'pin-tactic-section';
+    panel.appendChild(tacEl);
+  }
+  if (tactics.length) {
+    tacEl.innerHTML = `
+      <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#6b9fd4;margin:10px 0 6px">🃏 ${T('pin_tactic_heading')}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${tactics.slice().sort((a,b) => a.name.localeCompare(b.name)).map(t => {
+        const pinned = pinnedTactics.has(t.name);
+        const style = pinned
+          ? 'background:rgba(107,159,212,0.18);border:1px solid rgba(107,159,212,0.55);color:#6b9fd4;'
+          : 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#6b7280;';
+        return `<span onclick="togglePinTactic('${esc(t.name)}',event)" title="${pinned ? T('pin_remove') : T('pin_tactic_heading')}"
+          style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.15s;${style}">
+          ${esc(t.name)}${t.restricted ? ' <span style="opacity:0.6">(R)</span>' : ''} ${pinned ? '📌' : ''}
+        </span>`;
+      }).join('')}</div>`;
+    tacEl.style.display = '';
+  } else {
+    tacEl.style.display = 'none';
+  }
 }
 
 function renderRosterView() {
@@ -3188,34 +3286,31 @@ function renderRosterView() {
   document.getElementById('roster-name-lbl').textContent = r.name || T('roster_default_name');
   const total = (r.chars||[]).reduce((s,c) => s + (c.threat||0), 0);
   const pinnedCount = pinnedChars.size;
-  document.getElementById('roster-meta').textContent = `${(r.chars||[]).length} Chars · ${total} ${currentLang === 'en' ? 'pts' : 'Punkte'}${pinnedCount ? ` · 📌 ${pinnedCount} ${currentLang === 'en' ? 'pinned' : 'gepinnt'}` : ''}`;
+  document.getElementById('roster-meta').textContent = `${(r.chars||[]).length} Chars · ${total} ${T('pts_label')}${pinnedCount ? ` · 📌 ${pinnedCount} ${T('pinned_label')}` : ''}`;
   const rosterPb = analyzePowerBudget(r.chars || []);
   const rosterHungrySet = new Set(rosterPb.hungry.map(h => h.name));
   document.getElementById('view-chars').innerHTML = (r.chars||[]).slice().sort((a,b) => (b.threat||0)-(a.threat||0) || a.name.localeCompare(b.name)).map(c => {
     const pinned = pinnedChars.has(c.name);
     let lbl = '';
     if (c.leader) {
-      if (isEffectiveLeader(c))
-        lbl = ' <span style="font-size:0.65rem;background:rgba(201,162,39,0.12);border:1px solid rgba(201,162,39,0.3);color:#b89840;padding:1px 5px;border-radius:8px;font-weight:700">★ Leader</span>';
-      else
-        lbl = ' <span title="Kein Leader dieser Affiliation" style="font-size:0.65rem;background:rgba(100,100,100,0.12);border:1px solid rgba(150,150,150,0.25);color:#6b7280;padding:1px 5px;border-radius:8px;font-weight:700">★ ⚠️</span>';
+      lbl = ' <span style="font-size:0.65rem;background:rgba(201,162,39,0.12);border:1px solid rgba(201,162,39,0.3);color:#b89840;padding:1px 5px;border-radius:8px;font-weight:700">★ Leader</span>';
     }
     const noteLbl = c.note ? ` <span style="font-size:0.65rem;color:#9ca3af">${esc(c.note)}</span>` : '';
     const pd = rosterPb.details.find(d => d.name === c.name);
     const hungryLbl = rosterHungrySet.has(c.name)
       ? ` <span title="Power-hungrig: ${pd?.totalCost}⚡ Gesamtverbrauch bei ${pd?.genEst}⚡/Runde Garantieeinkommen" style="font-size:0.6rem;background:rgba(204,68,68,0.15);border:1px solid rgba(204,68,68,0.35);color:#cc6644;padding:1px 5px;border-radius:8px;font-weight:700;cursor:default">${T("pb_hungry_label")}</span>` : '';
     const pinnedStyle = pinned ? 'outline:2px solid #c9a227;outline-offset:2px;' : '';
-    const pinBtn = `<span onclick="togglePin('${esc(c.name)}',event)" title="${pinned?'Pin entfernen':'Immer ins Team'}" style="font-size:0.7rem;cursor:pointer;opacity:${pinned?'1':'0.25'};transition:opacity 0.15s" onmouseover="this.style.opacity=\'1\';" onmouseout="this.style.opacity=\'${pinned?'1':'0.25'}\';">📌</span>`;
+    const pinBtn = `<span onclick="togglePin('${esc(c.name)}',event)" title="${pinned?T('pin_remove'):T('pin_heading')}" style="font-size:0.7rem;cursor:pointer;opacity:${pinned?'1':'0.25'};transition:opacity 0.15s" onmouseover="this.style.opacity=\'1\';" onmouseout="this.style.opacity=\'${pinned?'1':'0.25'}\';">📌</span>`;
     const chipAv = `<img src="${charAvatarUrl(c.name)}" style="width:18px;height:18px;object-fit:cover;object-position:top center;border-radius:50%;flex-shrink:0" onerror="this.style.display='none'">`;
     const scoring = canScore(c.name);
     const noScoreLbl = !scoring.score
-      ? ` <span title="Kann keine Objectives halten/contestieren" style="font-size:0.6rem;background:rgba(204,68,68,0.15);border:1px solid rgba(204,68,68,0.35);color:#cc6644;padding:1px 5px;border-radius:8px;font-weight:700;cursor:default">🚫 ${currentLang === "en" ? "no Scoring" : "kein Scoring"}</span>`
+      ? ` <span title="Kann keine Objectives halten/contestieren" style="font-size:0.6rem;background:rgba(204,68,68,0.15);border:1px solid rgba(204,68,68,0.35);color:#cc6644;padding:1px 5px;border-radius:8px;font-weight:700;cursor:default">🚫 ${T('no_scoring_label')}</span>`
       : (!scoring.extract
           ? ` <span title="Kann keine Extract-Tokens halten" style="font-size:0.6rem;background:rgba(180,100,40,0.15);border:1px solid rgba(180,100,40,0.35);color:#c07840;padding:1px 5px;border-radius:8px;font-weight:700;cursor:default">🚫 Extract</span>`
           : (!scoring.secure
               ? ` <span title="Kann keine Secure-Objectives contestieren" style="font-size:0.6rem;background:rgba(180,100,40,0.15);border:1px solid rgba(180,100,40,0.35);color:#c07840;padding:1px 5px;border-radius:8px;font-weight:700;cursor:default">🚫 Secure</span>`
               : ''));
-    return `<span class="char-chip clickable" style="${charChipStyle(c)}${pinnedStyle}" onclick="showCharModal(this.dataset.n)" data-n="${esc(c.name)}">${chipAv}${esc(c.name)} <b class="ml-1">${c.threat}</b>${lbl}${noteLbl}${hungryLbl}${noScoreLbl} ${pinBtn}</span>`;
+    return `<span class="char-chip clickable" style="${charChipStyle(c, c.leader)}${pinnedStyle}" onclick="showCharModal(this.dataset.n)" data-n="${esc(c.name)}">${chipAv}${esc(c.name)} <b class="ml-1">${c.threat}</b>${lbl}${noteLbl}${hungryLbl}${noScoreLbl} ${pinBtn}</span>`;
   }).join('');
   const tactics = r.tactics || [];
   document.getElementById('view-tactics').innerHTML = tactics.map(t =>
@@ -3351,6 +3446,8 @@ function renderRosterView() {
   } else if (scEl) {
     scEl.style.display = 'none';
   }
+
+  renderPinPanel();
 
   // Power Ampel for full roster
   const ampelEl = document.getElementById('roster-power-ampel');
@@ -3760,12 +3857,17 @@ function pickTactics(approach, teamChars) {
 
   const tacApproach = approach === 'control' ? 'attrition' : approach; // control uses attrition tactics
   const all     = (myRoster.tactics||[]).filter(t => t.name && charsOk(t));
+
+  // Pinned tactics always come first (regardless of chars/approach filter)
+  const pinnedAll = (myRoster.tactics||[]).filter(t => t.name && pinnedTactics.has(t.name));
+  const pinned    = pinnedAll.filter(t => charsOk(t));
+
   const nr      = all.filter(t => !t.restricted && (t.for === tacApproach || t.for === 'both'));
   const r       = all.filter(t =>  t.restricted && (t.for === tacApproach || t.for === 'both'));
   const nrOther = all.filter(t => !t.restricted && t.for !== tacApproach && t.for !== 'both');
-  // Always return 5: fill from primary approach first, then other approach, then restricted
-  const result = [];
-  result.push(...nr);
+  // Pinned first, then fill from primary approach first, then other approach, then restricted
+  const result = [...pinned];
+  result.push(...nr.filter(t => !result.includes(t)));
   result.push(...nrOther.filter(t => !result.includes(t)));
   result.push(...r.filter(t => !result.includes(t)));
   return result.slice(0, 5);
@@ -5623,6 +5725,7 @@ function showTab(name) {
   if (name === 'chars')   renderCharBrowser();
   if (name === 'dice')    dcCalc();
   if (name === 'compare') { initCompareSelects(); renderCompare(); }
+  if (name === 'team')    renderPinPanel();
 }
 
 // ── CHARACTER BROWSER ───────────────────────────────────────────────────
